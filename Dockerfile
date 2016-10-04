@@ -5,7 +5,7 @@ ADD https://github.com/Yelp/dumb-init/releases/download/v1.0.1/dumb-init_1.0.1_a
 
 # Dockerfile is used only for cloud deployment. Otherwise Dockerfile-dev used
 WORKDIR /var/www/
-COPY package.json.docker package.json
+COPY package.json package.json
 
 # dumb-init needs to be executable
 RUN chmod +x /dumb-init
