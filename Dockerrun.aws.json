@@ -1,0 +1,71 @@
+{
+	"AWSEBDockerrunVersion": "2",
+	"volumes": [{
+		"name": "static-assets",
+		"host": {
+			"sourcePath": "/var/app/current/client/dist"
+		}
+	}, {
+		"name": "server-files",
+		"host": {
+			"sourcePath": "/var/app/current/server"
+		}
+	}, {
+		"name": "db-files",
+		"host": {
+			"sourcePath": "/var/app/current/db"
+		}
+	}],
+	"containerDefinitions": [{
+		"name": "web",
+		"image": "amiles/e2ee-demo",
+		"essential": true,
+		"memory": 128,
+		"environment": [{
+			"name": "NODE_ENV",
+			"value": "staging"
+		}],
+		"portMappings": [{
+			"hostPort": 8080,
+			"containerPort": 8080
+		}],
+		"mountPoints": [{
+			"sourceVolume": "server-files",
+			"containerPath": "/var/www/server",
+			"readOnly": true
+		}, {
+			"sourceVolume": "db-files",
+			"containerPath": "/var/www/db",
+			"readOnly": true
+		}]
+	},{
+		"name": "nginx",
+		"image": "amiles/nginx-reverse-proxy",
+		"environment": [{
+			"name": "WEB_HOSTNAME",
+			"value": "web"
+		}, {
+			"name": "WEB_PORT",
+			"value": "8080"
+		}, {
+			"name": "NGINX_PORT",
+			"value": "80"
+		}, {
+			"name": "STATIC_FILES_PATH",
+			"value": "/www"
+		}],
+		"links": [
+			"web"
+		],
+		"portMappings": [{
+			"hostPort": 80,
+			"containerPort": 80
+		}],
+		"essential": true,
+		"memory": 128,
+		"mountPoints": [{
+			"sourceVolume": "static-assets",
+			"containerPath": "/www"
+		}]
+	}]
+}

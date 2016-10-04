@@ -1,0 +1,8 @@
+*
+
+!client/dist/
+!server/
+!db/
+!package.json
+!Dockerrun.aws.json
+

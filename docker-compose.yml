@@ -1,0 +1,48 @@
+version: '2'
+services:
+  web:
+    links:
+      - db:db
+    container_name: e2ee-demo 
+    build:
+      context: .
+      dockerfile: Dockerfile-dev
+    environment:
+      NODE_ENV: development
+    volumes:
+      - $PWD:/var/www
+    ports:
+      - 8080:8080
+      - 8081:8081
+      - 8082:8082
+      - 5858:5858
+    expose:
+      - 8081
+      - 8082
+      - 8080
+      - 5858
+  db:
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+      MYSQL_DATABASE: "database_development"
+    image: mysql/mysql-server:5.6
+    ports:
+      - 3306:3306
+    expose:
+      - 3306
+  nginx:
+    links:
+      - web:web
+    image: amiles/nginx-reverse-proxy
+    environment:
+      - NGINX_PORT=80
+      - WEB_PORT=8080
+      - WEB_HOSTNAME=web # corresponds to web service name above
+      - STATIC_FILES_PATH=/www
+    ports:
+      - 80:80
+    expose:
+      - 80
+    volumes:
+      - ./client/dist:/www
+

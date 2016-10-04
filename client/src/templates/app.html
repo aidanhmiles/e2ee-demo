@@ -1,0 +1,15 @@
+<h1> Encrypted Messaging App</h1>
+
+<!-- main navigation links -->
+<a routerLink="/welcome" routerLinkActive="active"> Welcome Page</a> 
+| 
+<a routerLink="/chat" routerLinkActive="active"> Chat Page</a> 
+|
+<a *ngIf="!auth.isLoggedIn()" routerLink="/auth/login" routerLinkActive="active"> Login </a>
+<button *ngIf="auth.isLoggedIn()" (click)="auth.logout()"> Logout </button>
+
+<hr>
+
+<br>
+
+<router-outlet></router-outlet>

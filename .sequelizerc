@@ -1,0 +1,11 @@
+// This is a config file for the Sequelize CLI
+// for more info see https://github.com/sequelize/cli
+
+var path = require('path');
+
+module.exports = {
+  'models-path':	 path.resolve('server/api/models'),
+  'config':          path.resolve('db', 'config.json'),
+  'migrations-path': path.resolve('db', 'migrations'),
+  'seeders-path':	 path.resolve('db', 'seeds')
+};

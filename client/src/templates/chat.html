@@ -1,0 +1,29 @@
+
+<h3> Chat </h3>
+
+I am: {{ currentUser.username }}
+
+<form (ngSubmit)="sendMessage()" #messageForm="ngForm">
+    <input type="text"
+           name="text"
+           #text="ngModel"
+           [(ngModel)]="message.text"
+           required >
+
+    <button type="submit">
+        Send
+    </button>
+</form>
+
+<ul>
+    <li *ngFor="let msg of messageHistory | async">
+        msg
+    </li>
+</ul>
+
+<ul>
+    <li *ngFor="let user of userlist | async">
+        {{ user }}
+    </li>
+</ul>
+

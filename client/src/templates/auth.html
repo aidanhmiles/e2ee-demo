@@ -1,0 +1,23 @@
+
+<h3> {{ pageTitle }} </h3>
+
+<form (ngSubmit)="submit()">
+  <label> Email
+    <input type="text" 
+           placeholder="Username" 
+           [(ngModel)]="credentials.username" name="username">
+  </label>
+  <label> Password
+    <input type="password" 
+           placeholder="Password" 
+           [(ngModel)]="credentials.password" name="password">
+  </label>
+
+  <button type="submit"> Submit </button>
+</form>
+
+<p *ngIf="errorMsg" > {{ errorMsg }} </p>
+
+<br>
+
+<p *ngIf="getMode() === 'login'"> Don't have an account? <a routerLink="/auth/signup" routerLinkActive="active"> Sign Up </a> </p>

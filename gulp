@@ -1,0 +1,20 @@
+#!/bin/sh
+
+# This script delegates to the locally installed Gulp v4.0, and it is helpful 
+# because all devs will probably have v3.9 installed globally.
+# There are lots of major changes between 3 and 4, so it's not advised
+# to install Gulp 4 globally until all other project Gulpfiles have been migrated over
+
+# additionally, this script passes the --cwd and --gulpfile flags, in order to 
+# put the main gulpfile inside the gulptasks directory
+
+# bash note: '$@' passes all arguments from the command-line straight through
+
+# if node_modules doesn't exist, run npm install, then gulp
+if [ ! -d "./node_modules" ]; then 
+    npm install && \
+	./node_modules/gulp/bin/gulp.js --cwd $PWD --gulpfile ./gulptasks/gulpfile.js $@
+else 
+	# executes local gulp, passing all arguments straight through
+	./node_modules/gulp/bin/gulp.js --cwd $PWD --gulpfile ./gulptasks/gulpfile.js $@
+fi

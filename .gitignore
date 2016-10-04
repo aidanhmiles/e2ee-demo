@@ -1,0 +1,11 @@
+node_modules/
+bower_components/
+.git/
+.DS_Store
+*.vim
+dist/
+*.zip
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
