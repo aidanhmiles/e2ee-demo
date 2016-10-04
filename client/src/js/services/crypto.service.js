@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 require('script!js-nacl/lib/nacl_factory');
 
+
 const bcrypt = require('bcryptjs');
 
 
@@ -14,6 +15,7 @@ export class CryptoService {
 
     nacl_factory.instantiate((nacl) => {
       this.nacl = nacl;
+      window.nacl = nacl;
     });
   }
 
@@ -22,21 +24,20 @@ export class CryptoService {
 
   ensureKeypair() {
     // if not local keypair
-    if (!this.hasKeypair()) {
+    if (!this.keypair) {
       this.generateAndStoreKey();
     }
   }
 
   hasKeypair() {
-    return !!localStorage.getItem(this.keypairStorageId);
+    return !!this.keypair;
   }
 
   generateAndStoreKey() {
-    // for now, saving pk in local storage
-    // which is BAD
+    // for now, keypair just exists in memory
+    // which is BAD, should be imported using webcrypto cryptokey module
     // this is big TODO
     this.keypair = this.nacl.crypto_box_keypair();
-    localStorage.setItem(this.keypairStorageId, this.keypair);
   }
 
   unlockKey() {
@@ -44,12 +45,35 @@ export class CryptoService {
 
   bcryptHash(password) {
   }
-
   bcryptCompare(password, hash) {
   }
 
-  getKey() {
-    return this.pair;
+  getPublicKeyHex() {
+    return this.nacl.to_hex(this.keypair.boxPk);
+  }
+
+  fromHex(string) {
+    return this.nacl.from_hex(string);
+  }
+
+  cryptoBox(messageString, recipientPk) {
+    let nonce = this.nacl.crypto_box_random_nonce();
+    let messageBin = this.nacl.encode_utf8(messageString);
+    let box;
+
+    try {
+      debugger;
+      box = this.nacl.crypto_box(messageBin, nonce, recipientPk, this.keypair.boxSk);
+    } catch (e) {
+      log(e);
+      debugger;
+    }
+
+    return box;
+  }
+
+  cryptoBoxOpen(cipherTextBin, nonce, senderPk) {
+    return this.nacl.crypto_box_open(cipherTextBin, nonce, senderPk, this.keypair.boxSk);
   }
 
 }

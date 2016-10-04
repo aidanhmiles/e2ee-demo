@@ -15,15 +15,14 @@ I am: {{ currentUser.username }}
     </button>
 </form>
 
+<h4> Online Users (click to chat) </h4>
 <ul>
-    <li *ngFor="let msg of messageHistory | async">
-        msg
+    <li *ngFor="let user of onlineUsers"
+        (click)="sendMessageTo(user)">
+        {{ user.username }}
     </li>
 </ul>
 
-<ul>
-    <li *ngFor="let user of userlist | async">
-        {{ user }}
-    </li>
+<ul *ngFor="let convo of activeConversations">
+    <li></li>
 </ul>
-

@@ -3,6 +3,8 @@ import { SocketService } from '../services/socket.service';
 import { AuthService } from '../services/auth.service';
 import { Observable } from 'rxjs';
 
+import _ from 'lodash';
+
 @Component({
   template: require('../../templates/chat.html')
 })
@@ -12,7 +14,10 @@ export class ChatComponent {
     let self = this;
 
     this.currentUser = auth.getCurrentUser();
+
+    this.onlineUsers = [];
     self.socket = socketService.socket;
+    self.socketService = socketService;
 
     this.message = {
       text: 'write a message!'
@@ -22,25 +27,17 @@ export class ChatComponent {
   }
 
   listen() {
-    this.socket.on('new user', (user) => {
-      debugger;
-    });
-
-    this.socket.on('user disconnected', (user) => {
-    });
-
-    this.socket.on('direct message', (msg) => {
+    this.socket.on('online users', (users) => {
+      this.onlineUsers = users.filter((user) => {
+        return user.username !== this.currentUser.username;
+      });
     });
 
   }
 
-  sendMessage() {
-    this.socket.emit('test message', this.message.text);
-    this.message.text = '';
-  }
-
-  getConnectedClients() {
-    // return this.socket.connected;
+  sendMessageTo(userObj, message) {
+    message = message || `hi there from ${this.socket.id}`;
+    this.socketService.sendMessageTo(userObj, message);
   }
 
 }

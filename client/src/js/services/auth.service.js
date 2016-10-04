@@ -53,7 +53,7 @@ export class AuthService {
 
   isLoggedIn() {
     // Check if there's an unexpired JWT
-    // It searches for an item in localStorage with key == 'id_token'
+    // It searches by default for an item in localStorage with key == 'id_token'
     return tokenNotExpired();
   }
 
@@ -73,7 +73,6 @@ export class AuthService {
   getToken() {
     return localStorage.getItem(tokenStorageId);
   }
-
   setToken(token) {
     localStorage.setItem(tokenStorageId, token);
   }

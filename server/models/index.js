@@ -14,7 +14,7 @@ var path      = require('path');
 var Sequelize = require('sequelize');
 var basename  = path.basename(module.filename);
 var env       = process.env.NODE_ENV;
-var dbConfig    = require(path.resolve(__dirname, '../../db/config.json'))[env];
+var dbConfig    = require(path.resolve(__dirname, '../../db/config'))[env];
 var db        = {};
 
 if (dbConfig.use_env_variable) {
