@@ -1,4 +1,4 @@
-{
+module.exports = {
   "development": {
     "username": "root",
     "password": null,
@@ -16,8 +16,8 @@
     "dialect": "mysql"
   },
   "demo": {
-    "username": "admin",
-    "password": "8{w33Mvh4r48[*8?W+8W",
+    "username": process.env.DB_USER,
+    "password": process.env.DB_PASSWORD,
     "database": "ebdb",
     "host": "aa1mxw2g1ynzf14.ckzwbjelkyk1.us-west-2.rds.amazonaws.com",
     "port": "3306",
