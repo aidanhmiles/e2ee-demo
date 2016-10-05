@@ -11,11 +11,11 @@ export class SocketService {
 
   constructor(auth: AuthService, crypto: CryptoService) {
     let self = this;
+    const socket = io.connect(env.API_ENDPOINT);
 
     self.auth = auth;
     self.crypto = crypto;
-
-    const socket = io.connect(env.API_ENDPOINT);
+    self.socket = socket;
 
 
     socket.on('connect', function() {
@@ -38,14 +38,14 @@ export class SocketService {
         });
     });
 
-    socket.on('direct message', (msg) => {
-      debugger;
-      console.log(msg);
-      // this.crypto.cryptoBoxOpen(msg);
-    });
+    socket.on('direct message', (cryptoBoxHex, nonceHex, sender) => {
+      let decoded = this.crypto.cryptoBoxOpen(
+        cryptoBoxHex,
+        nonceHex,
+        sender.publicKeyHex
+      );
 
-    window.socket = socket;
-    self.socket = socket;
+    });
   }
 
   join(room) {
@@ -55,13 +55,17 @@ export class SocketService {
   }
 
   sendMessageTo(userObj, message) {
-    let secretMessage = this.crypto.cryptoBox(
+    // destructure the output of cryptoBox
+    let [secretMessage, nonce] = this.crypto.cryptoBox(
       message,
-      this.crypto.fromHex(userObj.publicKeyHex)
+      userObj.publicKeyHex
     );
-    this.socket.emit('direct message', userObj, secretMessage);
+
+    this.socket.emit('direct message',
+      this.crypto.toHex(secretMessage),
+      this.crypto.toHex(nonce),
+      userObj
+    );
   }
 
-  init(socket) {
-  }
 }

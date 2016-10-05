@@ -48,32 +48,45 @@ export class CryptoService {
   bcryptCompare(password, hash) {
   }
 
+  // get the local private key in hexadecimal
   getPublicKeyHex() {
-    return this.nacl.to_hex(this.keypair.boxPk);
+    return this.toHex(this.keypair.boxPk);
   }
 
+  // delegate to nacl's to_hex method
+  toHex(bin) {
+    return this.nacl.to_hex(bin);
+  }
+
+  // delegate to nacl's from_hex method
   fromHex(string) {
     return this.nacl.from_hex(string);
   }
 
-  cryptoBox(messageString, recipientPk) {
+  // encrypt a string via nacl's crypto_box
+  cryptoBox(messageString, recipientPkHex) {
     let nonce = this.nacl.crypto_box_random_nonce();
     let messageBin = this.nacl.encode_utf8(messageString);
-    let box;
+    let recipientPk = this.fromHex(recipientPkHex);
+    let box = this.nacl.crypto_box(
+      messageBin,
+      nonce,
+      recipientPk,
+      this.keypair.boxSk
+    );
 
-    try {
-      debugger;
-      box = this.nacl.crypto_box(messageBin, nonce, recipientPk, this.keypair.boxSk);
-    } catch (e) {
-      log(e);
-      debugger;
-    }
-
-    return box;
+    return [box,nonce];
   }
 
-  cryptoBoxOpen(cipherTextBin, nonce, senderPk) {
-    return this.nacl.crypto_box_open(cipherTextBin, nonce, senderPk, this.keypair.boxSk);
+  // decrypt a string via nacl's crypto_box
+  cryptoBoxOpen(cryptoBoxHex, nonceHex, senderPkHex) {
+    debugger;
+    return this.nacl.crypto_box_open(
+      this.fromHex(cryptoBoxHex),
+      this.fromHex(nonceHex),
+      this.fromHex(senderPkHex),
+      this.keypair.boxSk
+    );
   }
 
 }

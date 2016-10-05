@@ -28,7 +28,7 @@ module.exports = (function(){
       message = args[0];
       level = 'info';
     }
-    oldLog(level, `[${new Date().toString()}] ${message}`);
+    oldLog(`[${new Date().toString()}]`, ...args);
   };
 
   return logger;

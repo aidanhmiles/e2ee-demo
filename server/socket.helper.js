@@ -20,10 +20,15 @@ module.exports = (function(socket, socketioJwt, _, logger, config){
 
     // create an object with identifying information
     let publicProfile = {
-      id: newSocket.id, 
+      socketId: newSocket.id, 
     };
 
     _.extend(publicProfile, newSocket.decoded_token);
+
+    let existingIndex = _.findIndex(
+      onlineUsers, 
+      ['username', publicProfile.username]
+    );
 
     // tell the new socket who's online
     newSocket.emit('online users', onlineUsers);
@@ -39,31 +44,49 @@ module.exports = (function(socket, socketioJwt, _, logger, config){
     });
 
     // when the socket sends a direct message to a user
-    newSocket.on('direct message', function(userObj, msg){
-      logger.log(userObj, msg);
-      newSocket.broadcast.to(userObj.id).emit('direct message', userObj, msg);
+    newSocket.on('direct message', function(cryptoBox, nonce, userObj){
+      newSocket.broadcast.to(userObj.socketId).emit('direct message', 
+        cryptoBox, 
+        nonce,
+        userObj
+      );
     });
 
     // on disconnect
     newSocket.on('disconnect', function(){
       // remove the socket ID from currentUsers
-      let disconnectedUser = removeOnlineUser(newSocket.id);
-      if (disconnectedUser) {
-        console.log(`User ${disconnectedUser.username} left`);
-      }
+      let disconnectedUser = removeOnlineUser(publicProfile.username);
+      console.log(`User ${disconnectedUser.username} left`);
       io.emit('online users', onlineUsers);
 
     });
   }
 
   function addOnlineUser(profileData) {
+    let existingIndex = _.findIndex(
+      onlineUsers, 
+      ['username', profileData.username]
+    );
+    logger.log(profileData.username, _.map(onlineUsers, 'username'));
+    if (existingIndex > -1){
+      logger.log('user exists, replace socketId');
+      logger.log(
+        profileData.username, 
+        profileData.socketId, 
+        onlineUsers[existingIndex].socketId
+      );
+
+      onlineUsers[existingIndex].socketId = profileData.socketId;
+    }
+    else {
       onlineUsers.push(profileData);
-      console.log(`User ${profileData.username} joined`);
+    }
+    console.log(`User ${profileData.username} joined`);
   }
 
-  function removeOnlineUser(socketId) {
+  function removeOnlineUser(username) {
     let user = onlineUsers.splice(
-        _.findIndex(onlineUsers, ['id'], socketId),
+        _.findIndex(onlineUsers, ['username', username]),
         1
       )[0]; // will only return one item, but it's wrapped in an array
     return user;
