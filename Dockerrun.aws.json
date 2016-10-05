@@ -23,7 +23,7 @@
 		"memory": 128,
 		"environment": [{
 			"name": "NODE_ENV",
-			"value": "staging"
+			"value": "demo"
 		}],
 		"portMappings": [{
 			"hostPort": 8080,
@@ -61,7 +61,7 @@
 			"hostPort": 80,
 			"containerPort": 80
 		}],
-		"essential": false,
+		"essential": true,
 		"memory": 128,
 		"mountPoints": [{
 			"sourceVolume": "static-assets",

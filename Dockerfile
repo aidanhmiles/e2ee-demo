@@ -1,7 +1,7 @@
 FROM mhart/alpine-node:6
 
 # https://github.com/Yelp/dumb-init
-ADD https://github.com/Yelp/dumb-init/releases/download/v1.0.1/dumb-init_1.0.1_amd64 /dumb-init
+ADD https://github.com/Yelp/dumb-init/releases/download/v1.1.3/dumb-init_1.1.3_amd64 /dumb-init
 
 # Dockerfile is used only for cloud deployment. Otherwise Dockerfile-dev used
 WORKDIR /var/www/
