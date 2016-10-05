@@ -61,7 +61,7 @@
 			"hostPort": 80,
 			"containerPort": 80
 		}],
-		"essential": true,
+		"essential": false,
 		"memory": 128,
 		"mountPoints": [{
 			"sourceVolume": "static-assets",
