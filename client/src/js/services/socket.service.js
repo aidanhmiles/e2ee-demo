@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import _ from 'lodash';
 
 import { AuthService } from './auth.service';
 import { CryptoService } from './crypto.service';
@@ -22,14 +23,12 @@ export class SocketService {
       socket
         .emit('authenticate', { token: auth.getToken() }) // send the jwt
         .on('authenticated', function() {
-          // do other things
-          self.crypto.ensureKeypair();
-          socket.emit('pk', {
-            // send public key for others to use
-            // must be as hexadecimal because byte arrays
-            // don't get preserved correctly when sent over the wire
-            publicKeyHex: self.crypto.getPublicKeyHex()
-          });
+          // self.crypto.ensureKeypair();
+
+          // send public key for others to use
+          // must be as hexadecimal because byte arrays
+          // don't get preserved correctly when sent over the wire
+          socket.emit('pk', self.crypto.getPublicKeyHex());
         })
         // in case of invalid JWT...
         .on('unauthorized', function(msg) {
@@ -38,12 +37,13 @@ export class SocketService {
         });
     });
 
-    socket.on('direct message', (cryptoBoxHex, nonceHex, sender) => {
+    socket.on('direct message', (data) => {
       let decoded = this.crypto.cryptoBoxOpen(
-        cryptoBoxHex,
-        nonceHex,
-        sender.publicKeyHex
+        data.cryptoBoxHex,
+        data.nonceHex,
+        data.senderProfile.publicKeyHex
       );
+      alert(`${data.senderProfile.username} says: ${decoded}`);
 
     });
   }
@@ -54,18 +54,26 @@ export class SocketService {
   startConversation(id) {
   }
 
-  sendMessageTo(userObj, message) {
+  sendMessageTo(recipientProfile, message) {
     // destructure the output of cryptoBox
-    let [secretMessage, nonce] = this.crypto.cryptoBox(
+    let [secretBoxBin, nonceBin] = this.crypto.cryptoBox(
       message,
-      userObj.publicKeyHex
+      recipientProfile.publicKeyHex
     );
 
-    this.socket.emit('direct message',
-      this.crypto.toHex(secretMessage),
-      this.crypto.toHex(nonce),
-      userObj
+    // create a profile object for the sender,
+    // adding their public key from CryptoService
+    let senderProfile = _.extend(
+      this.auth.getCurrentUser(),
+      { publicKeyHex: this.crypto.getPublicKeyHex() }
     );
+
+    this.socket.emit('direct message', {
+      cryptoBoxHex: this.crypto.toHex(secretBoxBin),
+      nonceHex: this.crypto.toHex(nonceBin),
+      senderProfile,
+      recipientProfile
+    });
   }
-
 }
+

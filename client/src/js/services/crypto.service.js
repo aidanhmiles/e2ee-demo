@@ -29,6 +29,12 @@ export class CryptoService {
     }
   }
 
+  unsetKeypair() {
+    // BAD
+    // fix later
+    delete this.keypair;
+  }
+
   hasKeypair() {
     return !!this.keypair;
   }
@@ -41,11 +47,6 @@ export class CryptoService {
   }
 
   unlockKey() {
-  }
-
-  bcryptHash(password) {
-  }
-  bcryptCompare(password, hash) {
   }
 
   // get the local private key in hexadecimal
@@ -65,9 +66,13 @@ export class CryptoService {
 
   // encrypt a string via nacl's crypto_box
   cryptoBox(messageString, recipientPkHex) {
-    let nonce = this.nacl.crypto_box_random_nonce();
+    // get binary equivalient of messageString
     let messageBin = this.nacl.encode_utf8(messageString);
+    // get a random nonce, already in binary form
+    let nonce = this.nacl.crypto_box_random_nonce();
+    // convert the recipient's public key from hexadecimal
     let recipientPk = this.fromHex(recipientPkHex);
+    // create an encryped string that only the other party can read
     let box = this.nacl.crypto_box(
       messageBin,
       nonce,
@@ -80,14 +85,23 @@ export class CryptoService {
 
   // decrypt a string via nacl's crypto_box
   cryptoBoxOpen(cryptoBoxHex, nonceHex, senderPkHex) {
-    debugger;
-    return this.nacl.crypto_box_open(
-      this.fromHex(cryptoBoxHex),
-      this.fromHex(nonceHex),
-      this.fromHex(senderPkHex),
-      this.keypair.boxSk
+    // decode the binary of...
+    return this.nacl.decode_utf8(
+      // ...the decoded crypto box data
+      this.nacl.crypto_box_open(
+        this.fromHex(cryptoBoxHex),
+        this.fromHex(nonceHex),
+        this.fromHex(senderPkHex),
+        this.keypair.boxSk
+      )
     );
   }
 
+  bcryptHash(password) {
+  }
+  bcryptCompare(password, hash) {
+  }
+
 }
+
 

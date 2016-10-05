@@ -22,20 +22,28 @@ export class AuthService {
 
   login(creds) {
     return this.http
-               .post(`${env.API_ENDPOINT}/api/auth`, creds, { headers: this.headers })
-               .map((res) => res.json())
-               .do((res) => {
-                 this.setLocalUserData(res);
-               });
+      .post(
+        `${env.API_ENDPOINT}/api/auth`,
+        creds,
+        { headers: this.headers }
+      )
+      .map((res) => res.json())
+      .do((res) => {
+        this.setLocalUserData(res);
+      });
   }
 
   registerUser(creds) {
     return this.http
-               .post(`${env.API_ENDPOINT}/api/register`, creds, { headers: this.headers })
-               .map((res) => res.json())
-               .do((res) => {
-                 this.setLocalUserData(res);
-               });
+      .post(
+        `${env.API_ENDPOINT}/api/register`,
+        creds,
+        { headers: this.headers }
+      )
+      .map((res) => res.json())
+      .do((res) => {
+        this.setLocalUserData(res);
+      });
   }
 
   setLocalUserData(responseData) {
@@ -47,14 +55,22 @@ export class AuthService {
   unsetLocalUserData() {
     // Remove token from localStorage
     localStorage.removeItem(tokenStorageId);
-    localStorage.removeItem(this.crypto.keypairStorageId);
+    this.crypto.unsetKeypair();
     this.setCurrentUser(null);
   }
 
   isLoggedIn() {
     // Check if there's an unexpired JWT
     // It searches by default for an item in localStorage with key == 'id_token'
-    return tokenNotExpired();
+    let hasValidToken = tokenNotExpired();
+
+    // temporary fix; for now, the keypair only exists in memory,
+    // so every time we check if we're logged in, make sure there's a keypair also
+    if (hasValidToken) {
+      this.crypto.ensureKeypair();
+    }
+
+    return hasValidToken;
   }
 
   setCurrentUser(userObj) {

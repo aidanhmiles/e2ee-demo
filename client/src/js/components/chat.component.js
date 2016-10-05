@@ -35,9 +35,9 @@ export class ChatComponent {
 
   }
 
-  sendMessageTo(userObj, message) {
+  sendMessageTo(recipientProfile, message) {
     message = message || `hi there from ${this.socket.id}`;
-    this.socketService.sendMessageTo(userObj, message);
+    this.socketService.sendMessageTo(recipientProfile, message);
   }
 
 }

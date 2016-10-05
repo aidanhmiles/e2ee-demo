@@ -19,46 +19,49 @@ module.exports = (function(socket, socketioJwt, _, logger, config){
   function handleNewSocket(newSocket) {
 
     // create an object with identifying information
-    let publicProfile = {
+    let userProfile = {
       socketId: newSocket.id, 
     };
 
-    _.extend(publicProfile, newSocket.decoded_token);
+    _.extend(userProfile, newSocket.decoded_token);
 
     let existingIndex = _.findIndex(
       onlineUsers, 
-      ['username', publicProfile.username]
+      ['username', userProfile.username]
     );
 
     // tell the new socket who's online
     newSocket.emit('online users', onlineUsers);
 
     // wait for client to send their public key
-    // must be as hexadecimal because byte arrays
+    // must be as hexadecimal strings because binary arrays
     // don't get preserved correctly when sent over the wire
-    newSocket.on('pk', (data) => {
-      publicProfile.publicKeyHex = data.publicKeyHex;
-      addOnlineUser(publicProfile);
+    newSocket.on('pk', (hexKeyString) => {
+      userProfile.publicKeyHex = hexKeyString;
+      addOnlineUser(userProfile);
       // tell everyone else that this socket has arrived
       io.emit('online users', onlineUsers);
     });
 
     // when the socket sends a direct message to a user
-    newSocket.on('direct message', function(cryptoBox, nonce, userObj){
-      newSocket.broadcast.to(userObj.socketId).emit('direct message', 
-        cryptoBox, 
-        nonce,
-        userObj
-      );
+    newSocket.on('direct message', function(data){
+
+      newSocket.broadcast
+        .to(data.recipientProfile.socketId)
+        .emit('direct message', 
+          // send everything to the recipient except for
+          // information about themselves (the recipientProfile)
+          _.pick(data, ['cryptoBoxHex', 'nonceHex', 'senderProfile'])
+        );
     });
 
     // on disconnect
     newSocket.on('disconnect', function(){
-      // remove the socket ID from currentUsers
-      let disconnectedUser = removeOnlineUser(publicProfile.username);
-      console.log(`User ${disconnectedUser.username} left`);
-      io.emit('online users', onlineUsers);
+      // remove the corresponding user from onlineUsers
+      let disconnectedUser = removeOnlineUser(userProfile.username);
 
+      logger.log(`User ${disconnectedUser.username} left`);
+      io.emit('online users', onlineUsers);
     });
   }
 
@@ -81,7 +84,7 @@ module.exports = (function(socket, socketioJwt, _, logger, config){
     else {
       onlineUsers.push(profileData);
     }
-    console.log(`User ${profileData.username} joined`);
+    logger.log(`User ${profileData.username} joined`);
   }
 
   function removeOnlineUser(username) {
